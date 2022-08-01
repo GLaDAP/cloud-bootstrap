@@ -1,0 +1,26 @@
+---
+- hosts: ldbc
+  become: false
+  tasks:
+    - name: Download the awscli bundle.
+      get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip dest=/tmp/awscliv2.zip
+      register: aws_cli_download_bundle
+
+    - name: Unarchive the installer.
+      unarchive: src=/tmp/awscliv2.zip dest=/tmp copy=no creates=/tmp/aws
+      when: aws_cli_download_bundle.changed
+      register: aws_cli_unarchive_installer
+
+    - name: Install awscli package.
+      shell: cd /tmp ; sudo ./aws/install
+      args:
+        creates: /usr/local/aws-cli
+      when: aws_cli_unarchive_installer.changed
+
+    - name: Add AWS environment variables
+      shell:
+        cmd: |
+          cat << EOF >> ~/.bashrc
+          export BUCKET_NAME=ldbc-snb-datagen-bi-2021-07
+          export AWS_PROFILE=ldbc
+          EOF

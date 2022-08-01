@@ -9,3 +9,4 @@ aws_availability_zone     = "us-east-1a"
 
 remote_exec_username      = "fedora"
 create_raid_drives        = false
+move_docker_installation  = false

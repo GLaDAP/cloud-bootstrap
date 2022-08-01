@@ -53,3 +53,8 @@ variable "create_raid_drives" {
     type = bool
     description = "Whether the EC2 instance has NVMe drives that needs to be a RAID volume"
 }
+
+variable "move_docker_installation" {
+    type = bool
+    description = "Move the Docker installation to the NVMe RAID volume"
+}

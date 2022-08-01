@@ -55,26 +55,31 @@
           owner: '{{ ansible_user }}'
           group: '{{ ansible_user }}'
 
-      - name: Stop Docker service
-        ansible.builtin.service:
-          name: docker
-          state: stopped
+      - name: Move Docker service to RAID volume
+        block:
+        - name: Stop Docker service
+          ansible.builtin.service:
+            name: docker
+            state: stopped
 
-      - name: Create /etc/docker
-        file:
-          path: /etc/docker/
-          state: directory
+        - name: Create /etc/docker
+          file:
+            path: /etc/docker/
+            state: directory
 
-      - name: Move docker data-root
-        shell: 
-          cmd: |
-            echo '{ "data-root": "/data/docker" }' | tee /etc/docker/daemon.json > /dev/null
-      
-      - name: Stop Docker service
-        ansible.builtin.service:
-          name: docker
-          state: started
+        - name: Move docker data-root
+          shell: 
+            cmd: |
+              echo '{ "data-root": "/data/docker" }' | tee /etc/docker/daemon.json > /dev/null
+        
+        - name: Stop Docker service
+          ansible.builtin.service:
+            name: docker
+            state: started
+        when: move_docker|bool
     when: create_volume|bool
+
+
 
   - name: Create /data without RAID
     block:
