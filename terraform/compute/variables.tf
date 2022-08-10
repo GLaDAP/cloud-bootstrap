@@ -58,3 +58,8 @@ variable "move_docker_installation" {
     type = bool
     description = "Move the Docker installation to the NVMe RAID volume"
 }
+
+variable "scale_factor" {
+    type = string
+    description = "The scale factor to use"
+}

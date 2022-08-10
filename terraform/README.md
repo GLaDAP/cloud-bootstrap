@@ -11,6 +11,7 @@ To use this files, the following is required:
 - Python: Used for Ansible
 - Ansible: installed by using e.g. `python3 -m pip install --user ansible`
 - Ansible.posix: Installed by using `ansible-galaxy collection install ansible.posix`
+- Ansible.community.aws: Installed by using `ansible-galaxy collection install community.aws`
 
 ## Contents
 
@@ -92,3 +93,5 @@ ssh -i "~/.ssh/private_key" ubuntu@ec2-10-111-11-194.compute-1.amazonaws.com
 
 Note that in this case the username is `ubuntu` since AMI-image `ami-0070c5311b7677678` corresponds to `ubuntu 20.04 LTS us-east-1`. When using other distributions, the username may be different.
 
+### Using AWS Module in Ansible
+To automate provisioning using Ansible, e.g. fetching data from a S3 bucket, see the Ansible community.aws documentation [here](https://docs.ansible.com/ansible/latest/collections/community/aws/).

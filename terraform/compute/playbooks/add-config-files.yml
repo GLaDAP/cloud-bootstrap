@@ -2,7 +2,7 @@
 - hosts: ldbc
   become: true
   tasks:
-  - name: Clone interactive implementations branch
+  - name: Clone ec2-bootstrap branch
     ansible.builtin.git:
       repo: https://github.com/szarnyasg/ec2-bootstrap
       dest: ~/ec2-bootstrap

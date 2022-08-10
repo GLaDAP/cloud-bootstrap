@@ -21,6 +21,28 @@
       shell:
         cmd: |
           cat << EOF >> ~/.bashrc
-          export BUCKET_NAME=ldbc-snb-datagen-bi-2021-07
-          export AWS_PROFILE=ldbc
+          export BUCKET_NAME=ldbc-audit-interactive-data
+          export AWS_PROFILE={{ profile_name }}
           EOF
+
+    # Note that this is used to fetch data from S3, so create
+    # an IAM that only has these rights and use that profile.
+    - name: Configure AWS CLI credentials
+      ansible.builtin.blockinfile:
+        path: ~/.aws/credentials
+        create: true
+        block: |
+          [{{ profile_name }}]
+          aws_access_key_id={{ access_key }}
+          aws_secret_access_key={{ secret_access_key }}
+      no_log: true
+        
+    - name: Configure AWS CLI config
+      ansible.builtin.blockinfile:
+        path: ~/.aws/config
+        create: true
+        block: |
+          [{{ profile_name }}]
+          region={{ aws_region }}
+          output=json
+      no_log: true

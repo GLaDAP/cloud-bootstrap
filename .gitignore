@@ -1,2 +1,9 @@
 .DS_Store
 terraform/compute/dev.tfvars
+terraform/compute/pass-file.enc
+terraform/compute/.terraform.lock.hcl
+terraform/compute/terraform.tfstate
+terraform/compute/terraform.tfstate.backup
+terraform/compute/.terraform/providers/*
+
+terraform/compute/*.ini

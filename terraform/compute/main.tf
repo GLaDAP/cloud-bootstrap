@@ -7,7 +7,13 @@ resource "aws_instance" "driver" {
     associate_public_ip_address = true
 
     availability_zone = var.aws_availability_zone
-    security_groups   = ["${aws_security_group.ingress-all-main.id}"]
+    security_groups   = [
+        "${aws_security_group.ingress-ssh.id}",
+        "${aws_security_group.ingress-https.id}",
+        "${aws_security_group.ingress-sut-1.id}",
+        "${aws_security_group.ingress-sut-2.id}",
+        "${aws_security_group.ingress-cypher.id}"
+    ]
     subnet_id         = "${aws_subnet.main.id}"
 
     tags = {
@@ -29,7 +35,7 @@ resource "aws_instance" "driver" {
             echo "[ldbc]" | tee -a ldbc.ini;
             echo "${self.public_ip} ansible_user=${var.remote_exec_username} ansible_ssh_private_key_file=${var.private_key_filepath}" | tee -a ldbc.ini;
             export ANSIBLE_HOST_KEY_CHECKING=False;
-            ansible-playbook -u ${var.remote_exec_username} --private-key ${var.private_key_filepath} --extra-vars="raid_nvme=${var.create_raid_drives} move_docker=${var.move_docker_installation}" -i ldbc.ini playbooks/main.yml
+            ansible-playbook -u ${var.remote_exec_username} --private-key ${var.private_key_filepath} --extra-vars="raid_nvme=${var.create_raid_drives} move_docker=${var.move_docker_installation} aws_region=${var.aws_region} scale_factor=${var.scale_factor}" -i ldbc.ini -e @aws-config.yml --vault-password-file pass-file.enc  playbooks/main.yml
             EOT
     }
 
@@ -45,7 +51,12 @@ resource "aws_instance" "sut" {
     associate_public_ip_address = true
 
     availability_zone = var.aws_availability_zone
-    security_groups   = ["${aws_security_group.ingress-all-main.id}"]
+    security_groups   = [
+        "${aws_security_group.ingress-ssh.id}",
+        "${aws_security_group.ingress-https.id}",
+        "${aws_security_group.ingress-sut-1.id}",
+        "${aws_security_group.ingress-sut-2.id}"
+    ]
     subnet_id         = "${aws_subnet.main.id}"
 
     tags = {
@@ -67,7 +78,7 @@ resource "aws_instance" "sut" {
             echo "[ldbc]" | tee -a ldbc_sut.ini;
             echo "${self.public_ip} ansible_user=${var.remote_exec_username} ansible_ssh_private_key_file=${var.private_key_filepath}" | tee -a ldbc_sut.ini;
             export ANSIBLE_HOST_KEY_CHECKING=False;
-            ansible-playbook -u ${var.remote_exec_username} --private-key ${var.private_key_filepath} --extra-vars="raid_nvme=${var.create_raid_drives}" -i ldbc_sut.ini playbooks/main.yml
+            ansible-playbook -u ${var.remote_exec_username} --private-key ${var.private_key_filepath} --extra-vars="raid_nvme=${var.create_raid_drives} move_docker=${var.move_docker_installation} aws_region=${var.aws_region} scale_factor=${var.scale_factor}" -i ldbc_sut.ini -e @aws-config.yml --vault-password-file pass-file.enc  playbooks/main-sut.yml
             EOT
     }
 
