@@ -1,3 +1,8 @@
+resource "aws_placement_group" "ldbc-pg" {
+  name     = "ldbc-pg"
+  strategy = "cluster"
+}
+
 resource "aws_instance" "driver" {
     ami             = var.aws_image
     instance_type   = var.aws_instance
@@ -27,6 +32,8 @@ resource "aws_instance" "driver" {
         user        = var.remote_exec_username
         host        = "${self.public_ip}"
     }
+
+    placement_group = aws_placement_group.ldbc-pg.id
 
     provisioner "local-exec" {
         command = <<EOT
@@ -70,6 +77,8 @@ resource "aws_instance" "sut" {
         user        = var.remote_exec_username
         host        = "${self.public_ip}"
     }
+
+    placement_group = aws_placement_group.ldbc-pg.id
 
     provisioner "local-exec" {
         command = <<EOT
