@@ -1,6 +1,7 @@
 # Cloud Bootstrap
 
-This repository contains Terraform and Ansible files to create a virtual machine in AWS or Azure. Readmes on usage can be found in the respective folders. 
+This repository contains Terraform and Ansible files to create a virtual machine in AWS or Azure. Readmes on usage can be found in the respective folders.
+This repository can be used to deploy a VM or two grouped VMs (AWS placement group or Azure Proximity). Note that the playbooks primarily is used to setup a LDBC benchmark environment. ⚠️ The script puts the public keys of me & a few collaborators on the machine.
 
 # Prerequisites
 
