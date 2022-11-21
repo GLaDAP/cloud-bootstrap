@@ -1,0 +1,53 @@
+---
+- hosts: ldbc
+  become: false
+  tasks:
+  - name: Clone datagen branch
+    ansible.builtin.git:
+      repo: https://github.com/ldbc/ldbc_snb_datagen_spark
+      dest: /data/ldbc_snb_datagen_spark
+
+  - name: Download Spark Hadoop
+    get_url: url=https://archive.apache.org/dist/spark/spark-3.2.2/spark-3.2.2-bin-hadoop3.2.tgz dest=/tmp/spark-3.2.2-bin-hadoop3.2.tgz
+    register: spark_download
+  
+  - name: Unarchive the installer
+    unarchive: src=/tmp/spark-3.2.2-bin-hadoop3.2.tgz dest=/opt/ copy=no creates=/opt/spark-3.2.2-bin-hadoop3.2
+    when: spark_download.changed
+    register: spark_unarchive_installer
+    become: true
+
+  - name: Add datagen env variables
+    shell:
+      cmd: |
+        cat << EOF >> ~/.bashrc
+        export SPARK_HOME=/opt/spark-3.2.1-bin-hadoop3.2
+        export PATH="\$SPARK_HOME/bin":"\$PATH"
+        export PLATFORM_VERSION=2.12_spark3.2
+        export DATAGEN_VERSION=0.5.0-SNAPSHOT
+        export LDBC_SNB_DATAGEN_DIR=/data/ldbc_snb_datagen_spark
+        export LDBC_SNB_DATAGEN_MAX_MEM=10G
+        EOF
+
+  - name: Build datagen
+    shell:
+      cmd: |
+        cd /data/ldbc_snb_datagen_spark && sbt assembly
+
+  - name: Install sbt using yum
+    block:
+      - name: Add SBT repo
+        shell:
+          cmd: |
+            rm -f /etc/yum.repos.d/bintray-rpm.repo || true
+            curl -L https://www.scala-sbt.org/sbt-rpm.repo > sbt-rpm.repo
+            mv sbt-rpm.repo /etc/yum.repos.d/
+        become: true
+
+      - name: Install sbt
+        ansible.builtin.yum:
+            name:
+            - sbt
+            state: present
+        become: true
+    when: ansible_os_family == "RedHat"

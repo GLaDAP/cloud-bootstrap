@@ -1,0 +1,48 @@
+---
+- hosts: ldbc
+  become: false
+  tasks:
+    - name: Download the awscli bundle.
+      get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip dest=/tmp/awscliv2.zip
+      register: aws_cli_download_bundle
+
+    - name: Unarchive the installer.
+      unarchive: src=/tmp/awscliv2.zip dest=/tmp copy=no creates=/tmp/aws
+      when: aws_cli_download_bundle.changed
+      register: aws_cli_unarchive_installer
+
+    - name: Install awscli package.
+      shell: cd /tmp ; sudo ./aws/install
+      args:
+        creates: /usr/local/aws-cli
+      when: aws_cli_unarchive_installer.changed
+
+    - name: Add AWS environment variables
+      shell:
+        cmd: |
+          cat << EOF >> ~/.bashrc
+          export BUCKET_NAME=ldbc-audit-interactive-data
+          export AWS_PROFILE={{ profile_name }}
+          EOF
+
+    # Note that this is used to fetch data from S3, so create
+    # an IAM that only has these rights and use that profile.
+    - name: Configure AWS CLI credentials
+      ansible.builtin.blockinfile:
+        path: ~/.aws/credentials
+        create: true
+        block: |
+          [{{ profile_name }}]
+          aws_access_key_id={{ access_key }}
+          aws_secret_access_key={{ secret_access_key }}
+      no_log: true
+        
+    - name: Configure AWS CLI config
+      ansible.builtin.blockinfile:
+        path: ~/.aws/config
+        create: true
+        block: |
+          [{{ profile_name }}]
+          region={{ aws_region }}
+          output=json
+      no_log: true
