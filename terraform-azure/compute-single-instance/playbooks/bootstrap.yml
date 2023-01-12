@@ -34,12 +34,6 @@
             state: latest
             update_cache: true
 
-      # - name: Select Python 3.9
-      #   community.general.alternatives:
-      #     name: python3
-      #     path: /usr/bin/python3.9
-      #     link: /usr/bin/python3
-      #     state: auto
     when: ansible_pkg_mgr == 'apt'
 
   - name: Install packages using yum
