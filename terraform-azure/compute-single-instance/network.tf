@@ -16,6 +16,24 @@ resource "azurerm_subnet" "main" {
     address_prefixes     = ["10.0.1.0/24"]
 }
 
+resource "azurerm_network_security_group" "main-sg-neo4j" {
+  name                = "${var.name_prefix}-sg-neo4j"
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
+
+  security_rule {
+    name                       = "neo4j"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "7474"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
 resource "azurerm_network_security_group" "main-sg-ssh" {
   name                = "${var.name_prefix}-sg-ssh"
   location            = data.azurerm_resource_group.main.location
@@ -34,9 +52,14 @@ resource "azurerm_network_security_group" "main-sg-ssh" {
   }
 }
 
-resource "azurerm_network_interface_security_group_association" "driver" {
+resource "azurerm_network_interface_security_group_association" "driver-ssh" {
     network_interface_id      = azurerm_network_interface.driver.id
     network_security_group_id = azurerm_network_security_group.main-sg-ssh.id
+}
+
+resource "azurerm_network_interface_security_group_association" "driver-neo4j" {
+    network_interface_id      = azurerm_network_interface.driver.id
+    network_security_group_id = azurerm_network_security_group.main-sg-neo4j.id
 }
 
 resource "azurerm_public_ip" "driver" {
